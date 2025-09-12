@@ -105,7 +105,6 @@ export class OrApp<S extends AppStateKeyed> extends LitElement {
                 height: 100dvh; /* Stretch to dynamic viewport height */
                 display: flex;
                 flex: 1;
-                flex-direction: column;
             }
                 
             .main-content {
@@ -137,8 +136,19 @@ export class OrApp<S extends AppStateKeyed> extends LitElement {
             }
             
             /* HEADER STYLES */
+            or-header {
+                width: 15rem;
+                transition: width 0.3s ease;
+            }
+
             or-header a > or-icon {
                 margin-right: 10px;
+            }
+
+            @media screen and (max-width: 768px) {
+                or-header {
+                    width: 4rem;
+                }
             }
         `;
     }

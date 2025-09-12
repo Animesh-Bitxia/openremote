@@ -10,7 +10,9 @@ import manager, {
     DefaultHeaderHeight,
     Util,
   DEFAULT_LANGUAGES,
-  Languages
+  Languages,
+  HeaderSelected,
+  HeaderTextColor
 } from "@openremote/core";
 import "@openremote/or-mwc-components/or-mwc-dialog";
 import "@openremote/or-icon";
@@ -21,7 +23,6 @@ import {AppStateKeyed, router, updateRealm} from "./index";
 import {AnyAction, Store} from "@reduxjs/toolkit";
 import * as Model from "@openremote/model";
 import {i18next} from "@openremote/or-translate";
-
 
 export {DEFAULT_LANGUAGES, Languages}
 
@@ -68,7 +69,6 @@ function hasRequiredRole(option: HeaderItem): boolean {
     return Object.entries(option.roles).some(([client, roles]) => roles.some((r: string) => manager.hasRole(r, client)));
 }
 
-
 function getCurrentMenuItemRef(defaultRef?: string): string | undefined {
     const menu = window.location.hash.substr(2).split("/")[0];
 	return menu || defaultRef;
@@ -77,17 +77,16 @@ function getCurrentMenuItemRef(defaultRef?: string): string | undefined {
 @customElement("or-header")
 export class OrHeader extends LitElement {
 
-    // language=CSS
     static get styles() {
         return css`
         
             :host {
                 --internal-or-header-color: var(--or-header-color, var(--or-app-color1, ${unsafeCSS(DefaultColor1)}));    
-                --internal-or-header-selected-color: var(--or-header-selected-color, var(--or-app-color4, ${unsafeCSS(DefaultColor4)}));    
-                --internal-or-header-text-color: var(--or-header-text-color, var(--or-app-color3, inherit));
+                --internal-or-header-selected-color: ${unsafeCSS(HeaderSelected)};
+                --internal-or-header-text-color: ${unsafeCSS(HeaderTextColor)};
                 --internal-or-header-height: var(--or-header-height, ${unsafeCSS(DefaultHeaderHeight)});
                 --internal-or-header-logo-margin: var(--or-header-logo-margin, 0 40px 0 0);
-                --internal-or-header-logo-height: var(--or-header-logo-height, var(--internal-or-header-height, ${unsafeCSS(DefaultHeaderHeight)}));
+                --internal-or-header-logo-height: var(--internal-or-header-height, ${unsafeCSS(DefaultHeaderHeight)});
                 --internal-or-header-item-size: var(--or-header-item-size, calc(${unsafeCSS(DefaultHeaderHeight)} - 20px));
                 --internal-or-header-drawer-color: var(--or-header-drawer-color, var(--or-app-color2, ${unsafeCSS(DefaultColor2)}));
                 --internal-or-header-drawer-text-color: var(--or-header-drawer-text-color, var(--or-app-color3, ${unsafeCSS(DefaultColor3)}));
@@ -97,9 +96,18 @@ export class OrHeader extends LitElement {
                 display: block;
                 z-index: 4;
             }
+
+            #sidebar-navigation-logo {
+                width: 90%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                margin: 10px;
+            }
               
             #toolbar-top {
                 display: flex;
+                flex-direction: column;
                 padding: 0;
             }
             
@@ -116,7 +124,7 @@ export class OrHeader extends LitElement {
             #header {
                 opacity: 1;
                 width: 100%;
-                height: var(--internal-or-header-height);
+                height: 100vh;
                 text-align: center;
                 background-color: var(--internal-or-header-color);
                 color: var(--internal-or-header-text-color);
@@ -199,23 +207,69 @@ export class OrHeader extends LitElement {
             }
           
             .menu-item {
-                opacity: 0.7;
                 cursor: pointer;
                 text-decoration: none !important;         
                 color: inherit;       
-                padding: 0 20px;
-                font-size: 14px;       
-            }        
+                margin-left: 10px;
+                font-size: 14px;
+                z-index: 1;
+                text-align: left;
+                margin-left: 20px;
+                position: relative;
+            }
+
+            .menu-item::after {
+                content: "";
+                position: absolute;
+                top: 0;
+                left: -10px;
+                width: calc(100% + 10px);
+                height: 100%;
+                border-radius: 8px 0 0 8px;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+                opacity: 0;
+                transition: opacity 0.3s ease;
+                z-index: -1;
+            }
             
-            .menu-item:hover,
+            .menu-item:hover::after,
             .menu-item[selected] {
                 opacity: 1;
-            }                
+            }
+
+            .menu-item[selected] or-icon,
+            .menu-item[selected] or-translate {
+                color: white;
+                transition: color 0.3s ease;
+                font-size: 16px;
+            }
+
+            .menu-item or-translate {
+                display: none;
+                transition: display 0.3s ease;
+            }
+
+            #toolbar-list {
+                height: calc(100vh - var(--internal-or-header-height));
+                overflow-y: scroll;
+                scrollbar-width: none;
+                -ms-overflow-style: none;
+            }
+
+            #toolbar-list::-webkit-scrollbar {
+                display: none;
+            }
+                
+            #desktop-left {
+                display: flex;
+                flex-direction: column;
+                position: relative;
+            }
+
             #desktop-left .menu-item or-icon {
                 margin-right: 10px;
             }
             #desktop-left .menu-item  {
-                display: none;
                 line-height: calc(var(--internal-or-header-height) - 4px);
             }
             
@@ -262,9 +316,187 @@ export class OrHeader extends LitElement {
             #realm-picker > span {
                 margin-right: 2px;
             }
+
+            #menu-item-indicator-upper,
+            #menu-item-indicator-lower,
+            #menu-item-indicator {
+                height: calc(var(--internal-or-header-height) - 4px) !important;
+                width: calc(15rem - 10px) !important;
+                position: absolute;
+                margin-left: 10px;
+                transition: all 0.3s ease;
+                z-index: 0;
+                background-color: var(--internal-or-header-selected-color);
+            }
+
+            #menu-item-indicator-upper {
+                margin-top: calc(var(--internal-or-header-height) * -1 + 4px);
+            }
+
+            #menu-item-indicator-upper-inside,
+            #menu-item-indicator-lower-inside,
+            #menu-item-indicator-inside {
+                background-color: white;
+                width: 100%;
+                height: 100%;
+            }
+                
+            #menu-item-indicator-upper-inside {
+                border-radius: 0 0 8px 0;
+            }
+
+            #menu-item-indicator-lower {
+                margin-top: calc(var(--internal-or-header-height) - 4px);
+            }
+                
+            #menu-item-indicator-lower-inside {
+                border-radius: 0 8px 0 0;
+            }
+
+            #menu-item-indicator {
+                background-color: white;
+            }
+
+            #menu-item-indicator-inside {
+                background-color: var(--internal-or-header-selected-color);
+                border-radius: 8px 0 0 8px;
+            }
+
+            #floating-alarm-btn {
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                width: 50px;
+                height: 50px;
+                border-radius: 50%;
+                background: var(--or-app-color1, ${unsafeCSS(DefaultColor1)});
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                cursor: grab;
+                z-index: 999999;
+                box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            }
+
+            #floating-alarm-btn:active {
+                cursor: grabbing;
+            }
+
+            #floating-alarm-btn or-icon {
+                font-size: 28px;
+            }
+
+            #floating-nav-btn {
+                position: fixed;
+                top: 50%;
+                right: -10px;
+                left: auto;
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                background: rgba(0,0,0,0.5);
+                color: white;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: grab;
+                z-index: 10000;
+                transform: translateY(-50%);
+                transition: transform 300ms ease, background 300ms ease;
+                backdrop-filter: blur(6px);
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            }
+
+            #floating-nav-btn.active {
+                transform: translateY(-50%) rotate(225deg);
+                background: rgba(0,0,0,0.65);
+            }
+
+            #nav-options {
+                position: fixed;
+                width: 0;
+                height: 0;
+                pointer-events: none;
+                z-index: 9999;
+            }
+
+            #nav-options button {
+                width: var(--option-size);
+                height: var(--option-size);
+                position: absolute;
+                left: 0;
+                top: 0;
+                padding: 8px;
+                border-radius: 50%;
+                border: none;
+                background: rgba(255, 255, 255, 0.8);
+                backdrop-filter: blur(8px);
+                color: black;
+                cursor: pointer;
+                transform: translate(-50%, -50%) translate(0px, 0px);
+                opacity: 0;
+                transition: transform 400ms cubic-bezier(.2,.9,.2,1), 
+                            opacity 220ms linear,
+                            box-shadow 0.3s ease,
+                            filter 0.3s ease;
+                pointer-events: none;
+
+                /* default shadow */
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            }
+
+            /* Hover effect: scale + glow */
+            #nav-options button:hover {
+                transform: translate(-50%, -50%) translate(0px, 0px) scale(1.15);
+                box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5), 0 0 10px rgba(38, 132, 37, 0.7);
+                filter: brightness(1.1);
+            }
+
+            #nav-options.open {
+                pointer-events: auto;
+            }
+
+            @media (max-width: 768px) {
+                #sidebar-navigation-logo {
+                    width: 100%;
+                    margin: 10px 0;
+                }
+
+                #menu-item-indicator {
+                    width: 3rem !important;
+                    border-radius: 50%;
+                }
+
+                #menu-item-indicator-upper,
+                #menu-item-indicator-lower {
+                    display: none !important;
+                }
+
+                #menu-item-indicator {
+                    width: 100% !important;
+                    height: var(--internal-or-header-height) !important;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    margin-left: 0;
+                }
+                
+                #menu-item-indicator-inside {
+                    margin: 0 10px;
+                    border-radius: 50%;
+                    width: calc(100% - 20px) !important;
+                }
+
+                .menu-item {
+                    margin-left: 0px;
+                    text-align: center;
+                }
+
+                .menu-item or-icon {
+                    margin-right: 0px !important;
+                }
+            }
           
-            /* Wide layout: when the viewport width is bigger than 768px, layout
-            changes to a wide layout. */
             @media (min-width: 768px) {
                 #menu-btn-desktop {
                     display: block;
@@ -286,17 +518,15 @@ export class OrHeader extends LitElement {
                     display: inline-block;
                 }
                 
-                #desktop-left .menu-item or-icon {
-                    display: none;
+                .menu-item or-translate {
+                    display: inline-block;
                 }
     
-                #desktop-left .menu-item[selected] {                
-                    border-bottom: 4px solid var(--internal-or-header-selected-color);
+                #desktop-left .menu-item[selected] {
                     line-height: calc(var(--internal-or-header-height) - 4px);
                 }
 
                 #logo {
-                    margin: var(--internal-or-header-logo-margin);
                     height: var(--internal-or-header-logo-height);
                     display: block;
                 }
@@ -312,14 +542,6 @@ export class OrHeader extends LitElement {
                 #desktop-left ::slotted(*[selected]) {                
                     border-bottom: 4px solid var(--internal-or-header-selected-color);
                     line-height: calc(var(--internal-or-header-height) - 4px);
-                }
-            }
-            
-            @media (min-width: 1024px) {
-               
-    
-                #desktop-left .menu-item or-icon{
-                    display: inline-block;
                 }
             }
     `;
@@ -360,6 +582,15 @@ export class OrHeader extends LitElement {
 
     private _eventSubscriptionId?: string;
 
+    private _navOpen = false;
+    private _navIsPointerDown = false;
+    private _navStartPointerY = 0;
+    private _navStartCenterY = 0;
+    private _navDragMoved = false;
+    private _navRadius = 50;
+    private _navStaggerMs = 40;
+    private _navMinDragThreshold = 6;
+
     public _onRealmSelect(realm: string) {
         this.store.dispatch(updateRealm(realm));
     }
@@ -382,6 +613,8 @@ export class OrHeader extends LitElement {
     disconnectedCallback() {
         super.disconnectedCallback();
         this._unsubscribeEvents();
+        window.removeEventListener('resize', this._boundSyncNav);
+        window.removeEventListener('scroll', this._boundSyncNav);
     }
 
     protected async _subscribeEvents() {
@@ -399,6 +632,221 @@ export class OrHeader extends LitElement {
         }
     }
 
+    protected updated(changedProperties: PropertyValues) {
+        super.updated(changedProperties);
+
+        if (changedProperties.has("activeMenu")) {
+            this._moveIndicator();
+        }
+    }
+
+    private _moveIndicator() {
+        const container = this.renderRoot.querySelector("#desktop-left") as HTMLElement;
+        const indicator = this.renderRoot.querySelector("#menu-item-indicator") as HTMLElement;
+        const indicatorUpper = this.renderRoot.querySelector("#menu-item-indicator-upper") as HTMLElement;
+        const indicatorLower = this.renderRoot.querySelector("#menu-item-indicator-lower") as HTMLElement;
+        const selected = container?.querySelector<HTMLElement>(`.menu-item[selected]`);
+
+        if (indicator && indicatorUpper && indicatorLower) {
+            if (selected) {
+                indicator.style.display = "block";
+                indicatorUpper.style.display = "block";
+                indicatorLower.style.display = "block";
+
+                const rect = selected.getBoundingClientRect();
+                const containerRect = container.getBoundingClientRect();
+
+                indicator.style.top = `${rect.top - containerRect.top}px`;
+                indicator.style.height = `${rect.height}px`;
+                indicator.style.width = `${rect.width}px`;
+
+                indicatorUpper.style.top = `${rect.top - containerRect.top}px`;
+                indicatorUpper.style.height = `${rect.height}px`;
+                indicatorUpper.style.width = `${rect.width}px`;
+
+                indicatorLower.style.top = `${rect.top - containerRect.top}px`;
+                indicatorLower.style.height = `${rect.height}px`;
+                indicatorLower.style.width = `${rect.width}px`;
+            } else {
+                indicator.style.display = "none";
+                indicatorUpper.style.display = "none";
+                indicatorLower.style.display = "none";
+            }
+        }
+    }
+
+    private _dragging = false;
+    private _dragStartX = 0;
+    private _dragStartY = 0;
+    private _offsetX = 0;
+    private _offsetY = 0;
+
+    private _boundSyncNav = this._syncNavOptionsContainerToButton.bind(this);
+
+    private _startDrag(e: MouseEvent | TouchEvent) {
+        e.preventDefault();
+
+        const startX = e instanceof MouseEvent ? e.clientX : e.touches[0].clientX;
+        const startY = e instanceof MouseEvent ? e.clientY : e.touches[0].clientY;
+
+        this._dragging = false;
+        this._dragStartX = startX;
+        this._dragStartY = startY;
+
+        const moveHandler = (ev: MouseEvent | TouchEvent) => {
+            const currentX = ev instanceof MouseEvent ? ev.clientX : ev.touches[0].clientX;
+            const currentY = ev instanceof MouseEvent ? ev.clientY : ev.touches[0].clientY;
+
+            const dx = currentX - this._dragStartX;
+            const dy = currentY - this._dragStartY;
+
+            if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+                this._dragging = true;
+                const btn = this.renderRoot.querySelector("#floating-alarm-btn") as HTMLElement;
+                if (btn) {
+                    btn.style.transform = `translate(${this._offsetX + dx}px, ${this._offsetY + dy}px)`;
+                }
+            }
+        };
+
+        const endHandler = (ev: MouseEvent | TouchEvent) => {
+            document.removeEventListener("mousemove", moveHandler);
+            document.removeEventListener("mouseup", endHandler);
+            document.removeEventListener("touchmove", moveHandler);
+            document.removeEventListener("touchend", endHandler);
+
+            if (this._dragging) {
+                this._offsetX += (e instanceof MouseEvent ? (ev as MouseEvent).clientX : (ev as TouchEvent).changedTouches[0].clientX) - this._dragStartX;
+                this._offsetY += (e instanceof MouseEvent ? (ev as MouseEvent).clientY : (ev as TouchEvent).changedTouches[0].clientY) - this._dragStartY;
+            } else {
+                router.navigate("alarms");
+            }
+        };
+
+        document.addEventListener("mousemove", moveHandler);
+        document.addEventListener("mouseup", endHandler);
+        document.addEventListener("touchmove", moveHandler);
+        document.addEventListener("touchend", endHandler);
+    }
+
+    firstUpdated() {
+        this._initNav();
+    }
+
+    private _initNav() {
+        const navBtn = this.renderRoot.querySelector('#floating-nav-btn') as HTMLElement;
+        if (navBtn) {
+            const initialCenterY = window.innerHeight / 2;
+            navBtn.style.top = `${Math.round(initialCenterY)}px`;
+        }
+        this._syncNavOptionsContainerToButton();
+        this._animateNavOptions(false);
+        window.addEventListener('resize', this._boundSyncNav);
+        window.addEventListener('scroll', this._boundSyncNav);
+    }
+
+    private _syncNavOptionsContainerToButton() {
+        const btn = this.renderRoot.querySelector("#floating-nav-btn") as HTMLElement;
+        const opts = this.renderRoot.querySelector("#nav-options") as HTMLElement;
+        if (!btn || !opts) return;
+        const rect = btn.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        opts.style.left = `${Math.round(cx)}px`;
+        opts.style.top = `${Math.round(cy)}px`;
+    }
+
+    private _computeNavOffsets(index: number, total: number) {
+        const angle = Math.PI * (index / (total - 1));
+        const x = -Math.sin(angle) * this._navRadius;
+        const y = -Math.cos(angle) * this._navRadius;
+        return { x, y };
+    }
+
+    private _animateNavOptions(open: boolean) {
+        const opts = this.renderRoot.querySelector("#nav-options") as HTMLElement;
+        const btns = Array.from(opts?.querySelectorAll('button') || []);
+        if (open) {
+            opts.classList.add('open');
+            opts.setAttribute('aria-hidden', 'false');
+        } else {
+            opts.classList.remove('open');
+            opts.setAttribute('aria-hidden', 'true');
+        }
+        btns.forEach((btn, i) => {
+            const { x, y } = this._computeNavOffsets(i, btns.length);
+            if (open) {
+                (btn as HTMLElement).style.transitionDelay = `${i * this._navStaggerMs}ms`;
+                (btn as HTMLElement).style.transform = `translate(-50%,-50%) translate(${x}px, ${y}px)`;
+                (btn as HTMLElement).style.opacity = '1';
+                (btn as HTMLElement).style.pointerEvents = 'auto';
+            } else {
+                (btn as HTMLElement).style.transitionDelay = `${(btns.length - 1 - i) * this._navStaggerMs}ms`;
+                (btn as HTMLElement).style.transform = `translate(-50%,-50%) translate(0px, 0px)`;
+                (btn as HTMLElement).style.opacity = '0';
+                (btn as HTMLElement).style.pointerEvents = 'none';
+            }
+        });
+    }
+
+    private _onNavPointerDown(e: PointerEvent) {
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
+        e.preventDefault();
+        const navBtn = this.renderRoot.querySelector('#floating-nav-btn') as HTMLElement;
+        if (!navBtn) return;
+        this._navIsPointerDown = true;
+        navBtn.setPointerCapture?.(e.pointerId);
+        const rect = navBtn.getBoundingClientRect();
+        this._navStartCenterY = rect.top + rect.height / 2;
+        this._navStartPointerY = e.clientY;
+        this._navDragMoved = false;
+        navBtn.style.cursor = 'grabbing';
+        document.addEventListener('pointermove', this._boundOnNavPointerMove);
+        document.addEventListener('pointerup', this._boundOnNavPointerUp);
+    }
+
+    private _boundOnNavPointerMove = (e: PointerEvent) => this._onNavPointerMove(e);
+    private _boundOnNavPointerUp = (e: PointerEvent) => this._onNavPointerUp(e);
+
+    private _onNavPointerMove(e: PointerEvent) {
+        if (!this._navIsPointerDown) return;
+        const dy = e.clientY - this._navStartPointerY;
+        if (Math.abs(dy) > this._navMinDragThreshold) this._navDragMoved = true;
+        const half = (this.renderRoot.querySelector('#floating-nav-btn') as HTMLElement).offsetHeight / 2;
+        const newCenterY = Math.min(
+            Math.max(this._navStartCenterY + dy, half),
+            window.innerHeight - half
+        );
+        const navBtn = this.renderRoot.querySelector('#floating-nav-btn') as HTMLElement;
+        if (navBtn) {
+            navBtn.style.top = `${Math.round(newCenterY)}px`;
+        }
+        this._syncNavOptionsContainerToButton();
+    }
+
+    private _onNavPointerUp(e: PointerEvent) {
+        if (!this._navIsPointerDown) return;
+        this._navIsPointerDown = false;
+        const navBtn = this.renderRoot.querySelector('#floating-nav-btn') as HTMLElement;
+        navBtn?.releasePointerCapture?.(e.pointerId);
+        if (navBtn) navBtn.style.cursor = 'grab';
+        document.removeEventListener('pointermove', this._boundOnNavPointerMove);
+        document.removeEventListener('pointerup', this._boundOnNavPointerUp);
+        if (this._navOpen) this._syncNavOptionsContainerToButton();
+    }
+
+    private _onNavClick() {
+        if (this._navDragMoved) {
+            this._navDragMoved = false;
+            return;
+        }
+        this._navOpen = !this._navOpen;
+        const navBtn = this.renderRoot.querySelector('#floating-nav-btn') as HTMLElement;
+        if (navBtn) navBtn.classList.toggle('active', this._navOpen);
+        this._syncNavOptionsContainerToButton();
+        this._animateNavOptions(this._navOpen);
+    }
+
     protected render() {
 
         if (!this.config) {
@@ -412,14 +860,26 @@ export class OrHeader extends LitElement {
            <!-- Header -->
             <div id="header" class="shadow">
                 <div id="toolbar-top">
-                    <div><img id="logo" src="${this.logo}" /><img id="logo-mobile" src="${this.logoMobile}" /></div>
+                    <div id="sidebar-navigation-logo"><img id="logo" src="${this.logo}" /><img id="logo-mobile" src="${this.logoMobile}" /></div>
 
                     <!-- This gets hidden on a small screen-->
                     <nav id="toolbar-list">
                         <div id="desktop-left">
+                            <div id="menu-item-indicator-upper">
+                                <div id="menu-item-indicator-upper-inside">
+                                </div>
+                            </div>
+                            <div id="menu-item-indicator">
+                                <div id="menu-item-indicator-inside">
+                                </div>
+                            </div>
+                            <div id="menu-item-indicator-lower">
+                                <div id="menu-item-indicator-lower-inside">
+                                </div>
+                            </div>
                             ${mainItems ? mainItems.filter(hasRequiredRole).map((headerItem) => {
                                 return html`
-                                    <a class="menu-item" @click="${(e: MouseEvent) => this._onHeaderItemSelect(headerItem)}" ?selected="${this.activeMenu === headerItem.href}"><or-icon icon="${headerItem.icon}"></or-icon><or-translate value="${headerItem.text}"></or-translate></a>
+                                    <a class="menu-item" data-href="${headerItem.href}" @click="${(e: MouseEvent) => this._onHeaderItemSelect(headerItem)}" ?selected="${this.activeMenu === headerItem.href}"><or-icon icon="${headerItem.icon}"></or-icon><or-translate value="${headerItem.text}"></or-translate></a>
                                 `;
                             }) : ``}
                         </div>
@@ -465,6 +925,28 @@ export class OrHeader extends LitElement {
                             })}
                         </div>` : ``}
                 </div>
+            </div>
+
+            <div id="floating-alarm-btn"
+                @mousedown="${this._startDrag}"
+                @touchstart="${this._startDrag}">
+            <or-icon icon="${this.alarmButton}"
+                    style="color:var(${this.alarmColor})"
+                    title="${i18next.t("alarm.alarm_plural")}"></or-icon>
+            </div>
+
+            <div id="floating-nav-btn"
+                 @pointerdown="${(e: PointerEvent) => this._onNavPointerDown(e)}"
+                 @click="${() => this._onNavClick()}">
+                <or-icon icon="plus"></or-icon>
+            </div>
+
+            <div id="nav-options" aria-hidden="true">
+              <button @click="${() => { router.navigate('pageA'); this._onNavClick(); }}">A</button>
+              <button @click="${() => { router.navigate('pageB'); this._onNavClick(); }}">B</button>
+              <button @click="${() => { router.navigate('pageC'); this._onNavClick(); }}">C</button>
+              <button @click="${() => { router.navigate('pageD'); this._onNavClick(); }}">D</button>
+              <button @click="${() => { router.navigate('pageE'); this._onNavClick(); }}">E</button>
             </div>
         `;
     }
