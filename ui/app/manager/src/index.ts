@@ -85,10 +85,7 @@ export const DefaultHeaderMainMenu: {[name: string]: HeaderItem} = {
     map: headerItemMap(orApp),
     assets: headerItemAssets(orApp),
     rules: headerItemRules(orApp),
-    insights: headerItemInsights(orApp)
-};
-
-export const DefaultHeaderSecondaryMenu: {[name: string]: HeaderItem} = {
+    insights: headerItemInsights(orApp),
     gatewayConnection: headerItemGatewayConnection(orApp),
     gatewayTunnel: headerItemGatewayTunnel(orApp),
     language: headerItemLanguage(orApp),
@@ -101,6 +98,9 @@ export const DefaultHeaderSecondaryMenu: {[name: string]: HeaderItem} = {
     provisioning: headerItemProvisioning(orApp),
     appearance: headerItemConfiguration(orApp),
     logout: headerItemLogout(orApp)
+};
+
+export const DefaultHeaderSecondaryMenu: {[name: string]: HeaderItem} = {
 };
 
 export const DefaultHeaderConfig: HeaderConfig = {
