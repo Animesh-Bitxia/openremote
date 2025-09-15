@@ -250,7 +250,7 @@ export class OrHeader extends LitElement {
             }
 
             #toolbar-list {
-                height: calc(100vh - var(--internal-or-header-height));
+                height: calc(100vh - var(--internal-or-header-height) - 17px);
                 overflow-y: scroll;
                 scrollbar-width: none;
                 -ms-overflow-style: none;

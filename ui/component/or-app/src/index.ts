@@ -145,6 +145,16 @@ export class OrApp<S extends AppStateKeyed> extends LitElement {
                 margin-right: 10px;
             }
 
+            #dust-canvas {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                pointer-events: none;
+                z-index: 999999;
+            }
+
             @media screen and (max-width: 768px) {
                 or-header {
                     width: 4rem;
@@ -203,6 +213,70 @@ export class OrApp<S extends AppStateKeyed> extends LitElement {
 
     protected firstUpdated(_changedProperties: Map<PropertyKey, unknown>): void {
         super.firstUpdated(_changedProperties);
+
+        const canvas = document.createElement("canvas");
+        canvas.id = "dust-canvas";
+        Object.assign(canvas.style, {
+            position: "fixed",
+            top: "0",
+            left: "0",
+            width: "100vw",
+            height: "100vh",
+            pointerEvents: "none",
+            zIndex: "9999",
+        });
+        document.body.appendChild(canvas);
+
+        const ctx = canvas.getContext("2d")!;
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let pointer = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+        let dot = { x: pointer.x, y: pointer.y };
+        let circle = { x: pointer.x, y: pointer.y };
+
+        const dotDelay = 0.15; // smaller delay, follows quickly
+        const circleDelay = 0.05; // bigger delay, slower trail
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // update dot position
+            dot.x += (pointer.x - dot.x) * dotDelay;
+            dot.y += (pointer.y - dot.y) * dotDelay;
+
+            // update circle position
+            circle.x += (pointer.x - circle.x) * circleDelay;
+            circle.y += (pointer.y - circle.y) * circleDelay;
+
+            // draw small dot
+            ctx.beginPath();
+            ctx.arc(dot.x, dot.y, 5, 0, Math.PI * 2);
+            ctx.fillStyle = "rgba(162,209,11,1)";
+            ctx.fill();
+
+            // draw big circle
+            ctx.beginPath();
+            ctx.arc(circle.x, circle.y, 20, 0, Math.PI * 2);
+            ctx.strokeStyle = "rgba(162,209,11,0.5)";
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+
+        window.addEventListener("mousemove", (e) => {
+            pointer.x = e.clientX;
+            pointer.y = e.clientY;
+        });
+
+        window.addEventListener("resize", () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+        // ---- END DUST ANIMATION ----
 
         const managerConfig: ManagerConfig = this.managerConfig ? {...DEFAULT_MANAGER_CONFIG,...this.managerConfig} : DEFAULT_MANAGER_CONFIG;
         if (!managerConfig.realm) {
@@ -420,6 +494,7 @@ export class OrApp<S extends AppStateKeyed> extends LitElement {
             consoleStyles = html`<style>:host {--or-console-primary-color:${primary};--or-console-secondary-color:${secondary};}</style>`;
         }
         return html`
+            <canvas id="dust-canvas"></canvas>
             ${this._config.styles ? typeof(this._config.styles) === "string" ? html`<style>${this._config.styles}</style>` : this._config.styles.strings : ``}
             ${consoleStyles}
             ${this._config.header ? html`
