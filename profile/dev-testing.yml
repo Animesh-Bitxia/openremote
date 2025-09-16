@@ -6,6 +6,7 @@
 #
 volumes:
   postgresql-data:
+  superset-data:
 services:
 
   keycloak:
@@ -34,6 +35,20 @@ services:
     volumes:
       - ../tmp:/storage
       - postgresql-data:/var/lib/postgresql/data
+      - ../superset/init-superset-db.sql:/docker-entrypoint-initdb.d/init-superset-db.sql
     # Access directly if needed on localhost
     ports:
       - "5432:5432"
+  superset:
+    build: ../superset
+    environment:
+      SUPERSET_DATABASE_URI: "postgresql://superset:superset@postgresql:5432/superset"
+      SECRET_KEY: "your-secret-key-change-me"
+      REDIS_URL: "redis://redis:6379/0"
+    depends_on:
+      postgresql:
+        condition: service_healthy
+    ports:
+      - "8088:8088"
+    volumes:
+      - superset-data:/app/superset_home

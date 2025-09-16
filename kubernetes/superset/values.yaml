@@ -1,0 +1,69 @@
+# Default values for OpenRemote Superset Helm chart
+
+# Image configuration
+image:
+  repository: openremote/superset  # Build from superset/Dockerfile
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+# Image pull secrets (if using private registry)
+imagePullSecrets: []
+
+# Service configuration
+service:
+  type: ClusterIP
+  port: 8088
+
+# Ingress configuration (optional, for external access)
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: superset.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+# Environment variables for Superset
+env:
+  SUPERSET_DATABASE_URI: "postgresql://superset:superset@openremote-postgresql:5432/superset"  # Connect to OpenRemote's Postgres (create DB/user)
+  SECRET_KEY: "your-secret-key-change-me"  # Override in production
+  REDIS_URL: "redis://openremote-redis:6379/0"  # Use OpenRemote's Redis for cache
+  # Add Keycloak OIDC config later
+  # OIDC_CLIENT_ID: "superset"
+  # OIDC_CLIENT_SECRET: "secret"
+  # OAUTHLIB_INSECURE_TRANSPORT: "true"  # For dev
+
+# Resource limits
+resources:
+  requests:
+    cpu: 500m
+    memory: 1Gi
+  limits:
+    cpu: 2000m
+    memory: 2Gi
+
+# Persistence for Superset metadata (if not using shared DB)
+persistence:
+  enabled: false  # Use shared Postgres instead
+  size: 8Gi
+  storageClass: ""
+
+# Node selector and tolerations
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+# Additional volumes and mounts (e.g., for config)
+extraVolumes: []
+extraVolumeMounts: []
+
+# Init containers if needed (e.g., for DB init)
+initContainers: []
+
+# Hooks for Superset init (run db create, load examples)
+supersetInit:
+  enabled: true
+  # Commands to run on first deploy: superset db upgrade, init, etc.

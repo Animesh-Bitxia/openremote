@@ -9,6 +9,7 @@ volumes:
   proxy-data:
   manager-data:
   postgresql-data:
+  superset-data:
 
 services:
 
@@ -90,3 +91,19 @@ services:
       OR_SETUP_IMPORT_DEMO_AGENT_VELBUS:
     volumes:
       - manager-data:/storage
+
+  superset:
+    restart: always
+    build: ./superset
+    depends_on:
+      postgresql:
+        condition: service_healthy
+    ports:
+      - "8088:8088"
+    environment:
+      SUPERSET_DATABASE_URI: "postgresql://superset:superset@postgresql:5432/superset"
+      SECRET_KEY: "your-secret-key-change-me"
+      REDIS_URL: "redis://redis:6379/0"  # If Redis is added later
+    volumes:
+      - superset-data:/app/superset_home
+    # Note: Run 'superset db upgrade' and 'superset init' manually after first start
