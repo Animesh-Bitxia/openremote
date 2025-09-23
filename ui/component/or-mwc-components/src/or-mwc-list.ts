@@ -10,7 +10,7 @@ import {customElement, property, query} from "lit/decorators.js";
 import {styleMap} from "lit/directives/style-map.js";
 import {ifDefined} from "lit/directives/if-defined.js";
 import {MDCList, MDCListActionEvent} from "@material/list";
-import { DefaultColor8, DefaultColor4, Util } from "@openremote/core";
+import { DefaultColor8, DefaultColor4, Util, DefaultColor12, DefaultColor13 } from "@openremote/core";
 import "@openremote/or-translate";
 import { i18next } from "@openremote/or-translate";
 const listStyle = require("@material/list/dist/mdc.list.css");
@@ -215,7 +215,7 @@ const style = css`
         
         --mdc-theme-primary: var(--internal-or-mwc-input-color);
         --mdc-theme-on-primary: var(--internal-or-mwc-input-text-color);
-        --mdc-theme-secondary: var(--internal-or-mwc-input-color);
+        --mdc-theme-secondary: ${unsafeCSS(DefaultColor13)};
     }
     
     .mdc-list-item__graphic {

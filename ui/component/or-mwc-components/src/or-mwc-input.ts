@@ -16,7 +16,7 @@ import {MDCList, MDCListActionEvent} from "@material/list";
 
 import {MDCFormField, MDCFormFieldInput} from "@material/form-field";
 import {MDCIconButtonToggle, MDCIconButtonToggleEventDetail} from "@material/icon-button";
-import {DefaultColor4, DefaultColor5, DefaultColor8, Util} from "@openremote/core";
+import {DefaultColor12, DefaultColor4, DefaultColor5, DefaultColor8, Util} from "@openremote/core";
 import "@openremote/or-icon";
 import {OrIcon} from "@openremote/or-icon";
 import {
@@ -444,7 +444,7 @@ const style = css`
         
         --mdc-theme-primary: var(--internal-or-mwc-input-color);
         --mdc-theme-on-primary: var(--internal-or-mwc-input-text-color);
-        --mdc-theme-secondary: var(--internal-or-mwc-input-color);
+        --mdc-theme-secondary: ${unsafeCSS(DefaultColor12)};
     }
     
     :host([hidden]) {

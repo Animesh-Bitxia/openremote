@@ -6,7 +6,7 @@ import {
   unsafeCSS,
 } from "lit";
 import {customElement, property, state} from "lit/decorators.js";
-import manager, {OREvent, DefaultColor3, OPENREMOTE_CLIENT_ID} from "@openremote/core";
+import manager, {OREvent, DefaultColor3, OPENREMOTE_CLIENT_ID, DefaultColor4, DefaultColor12} from "@openremote/core";
 import "@openremote/or-components/or-panel";
 import "@openremote/or-translate";
 import { Store } from "@reduxjs/toolkit";
@@ -55,7 +55,7 @@ export class PageRoles extends Page<AppStateKeyed> {
           margin: 20px auto;
           align-items: center;
           display: flex;
-          color: var(--or-app-color3, ${unsafeCSS(DefaultColor3)});
+          color: ${unsafeCSS(DefaultColor4)};
         }
 
         #title or-icon {
@@ -78,7 +78,7 @@ export class PageRoles extends Page<AppStateKeyed> {
           text-transform: uppercase;
           font-weight: bolder;
           line-height: 1em;
-          color: var(--or-app-color3, ${unsafeCSS(DefaultColor3)});
+          color: ${unsafeCSS(DefaultColor12)};
           margin-bottom: 20px;
           margin-top: 0;
           flex: 0 0 auto;

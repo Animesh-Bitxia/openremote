@@ -510,10 +510,6 @@ export class OrHeader extends LitElement {
                     display: none;
                 }
                 
-                #desktop-right {
-                    display: flex;
-                }
-                
                 #desktop-left .menu-item {
                     display: inline-block;
                 }

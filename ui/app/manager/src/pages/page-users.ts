@@ -1,6 +1,6 @@
 import {css, html, PropertyValues, TemplateResult, unsafeCSS} from "lit";
 import {customElement, property, state} from "lit/decorators.js";
-import manager, {DefaultColor3, DefaultColor4, OPENREMOTE_CLIENT_ID, Util} from "@openremote/core";
+import manager, {DefaultColor12, DefaultColor13, DefaultColor3, DefaultColor4, OPENREMOTE_CLIENT_ID, Util} from "@openremote/core";
 import "@openremote/or-components/or-panel";
 import "@openremote/or-translate";
 import {Store} from "@reduxjs/toolkit";
@@ -69,7 +69,7 @@ export class PageUsers extends Page<AppStateKeyed> {
                     margin: 20px auto;
                     align-items: center;
                     display: flex;
-                    color: var(--or-app-color3, ${unsafeCSS(DefaultColor3)});
+                    color: ${unsafeCSS(DefaultColor4)};
                 }
 
                 #title or-icon {
@@ -96,7 +96,7 @@ export class PageUsers extends Page<AppStateKeyed> {
                     display: flex;
                     text-transform: uppercase;
                     font-weight: bolder;
-                    color: var(--or-app-color3, ${unsafeCSS(DefaultColor3)});
+                    color: ${unsafeCSS(DefaultColor12)};
                     line-height: 1em;
                     margin-bottom: 10px;
                     margin-top: 0;
@@ -147,7 +147,7 @@ export class PageUsers extends Page<AppStateKeyed> {
 
                 .breadcrumb-clickable {
                     cursor: pointer;
-                    color: var(--or-app-color4, ${unsafeCSS(DefaultColor4)});
+                    color: ${unsafeCSS(DefaultColor13)};
                 }
 
                 .breadcrumb-arrow {

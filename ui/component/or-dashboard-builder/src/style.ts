@@ -45,7 +45,7 @@ export const style = css`
     }
         
     #menu-header {
-        background-color: var(--internal-or-asset-tree-header-color);
+        background-color: ${unsafeCSS(DefaultColor4)};
         display: flex;
         align-items: center;
         width: 100%;

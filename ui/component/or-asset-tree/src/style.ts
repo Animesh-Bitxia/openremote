@@ -1,5 +1,5 @@
 import {css, unsafeCSS} from "lit";
-import { DefaultColor1, DefaultColor2, DefaultColor4, DefaultColor5, DefaultColor8 } from "@openremote/core";
+import { DefaultColor1, DefaultColor12, DefaultColor2, DefaultColor4, DefaultColor5, DefaultColor8 } from "@openremote/core";
 import {mdiChevronRight} from "@mdi/js";
 import {mdiChevronDown} from "@mdi/js";
 
@@ -17,7 +17,7 @@ export const style = css`
         --internal-or-asset-tree-item-height: var(--or-asset-tree-item-height, 24px);
         --internal-or-asset-tree-item-padding: var(--or-asset-tree-item-padding, 10px);
         --internal-or-asset-tree-selected-background-color: var(--or-asset-tree-selected-background-color, var(--or-app-color2, ${unsafeCSS(DefaultColor2)}));
-        --internal-or-asset-tree-selected-color: var(--or-asset-tree-selected-color, var(--or-app-color4, ${unsafeCSS(DefaultColor4)}));
+        --internal-or-asset-tree-selected-color: ${unsafeCSS(DefaultColor12)};
         --internal-or-asset-tree-button-color: var(--or-asset-tree-button-color, var(--or-app-color4, ${unsafeCSS(DefaultColor4)}));
         --internal-or-asset-tree-line-color: var(--or-asset-tree-line-color, var(--or-app-color5, ${unsafeCSS(DefaultColor5)}));
         

@@ -18,7 +18,7 @@ import {
     UsernamePassword
 } from "@openremote/model";
 import * as Util from "./util";
-import {createMdiIconSet, createSvgIconSet, IconSets, OrIconSet} from "@openremote/or-icon";
+import {createImageIconSet, createMdiIconSet, createSvgIconSet, IconSets, OrIconSet} from "@openremote/or-icon";
 import Keycloak from 'keycloak-js';
 
 // Re-exports
@@ -656,6 +656,10 @@ export class Manager implements EventProviderFactory {
             IconSets.addIconSet(
                 "or",
                 createSvgIconSet(OrIconSet.size, OrIconSet.icons)
+            );
+            IconSets.addIconSet(
+                "img", 
+                createImageIconSet(manager.managerUrl!)
             );
         }
     }

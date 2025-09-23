@@ -17,14 +17,14 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import {css, html, LitElement, PropertyValues, TemplateResult} from "lit";
+import {css, html, LitElement, PropertyValues, TemplateResult, unsafeCSS} from "lit";
 import {customElement, property, queryAll} from "lit/decorators.js";
 import {map} from "lit/directives/map.js";
 import {when} from "lit/directives/when.js";
 import {InputType} from "@openremote/or-mwc-components/or-mwc-input";
 import {getContentWithMenuTemplate} from "@openremote/or-mwc-components/or-mwc-menu";
 import {ListItem} from "@openremote/or-mwc-components/or-mwc-list";
-import {Util} from "@openremote/core";
+import {DefaultColor12, Util} from "@openremote/core";
 import {OrTreeNode} from "./or-tree-node";
 import {OrTreeGroup} from "./or-tree-group";
 import {moveNodesToGroupNode} from "./util";
@@ -75,7 +75,7 @@ const styles = css`
         align-items: center;
         padding: 0 15px;
         min-height: 48px;
-        background: var(--or-app-color4, #4d9d2a);
+        background: ${unsafeCSS(DefaultColor12)};
         color: var(--or-app-color7, white);
         --or-icon-fill: var(--or-app-color7, white);
     }

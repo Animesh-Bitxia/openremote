@@ -20,8 +20,8 @@
 import {OrTreeMenu, TreeMenuSelection, TreeMenuSorting, TreeNode} from "@openremote/or-tree-menu";
 import {customElement, property, state} from "lit/decorators.js";
 import {RealmRuleset, RulesetLang, RulesetStatus, RulesetUnion} from "@openremote/model";
-import {css, html, PropertyValues, TemplateResult} from "lit";
-import manager, {Util} from "@openremote/core";
+import {css, html, PropertyValues, TemplateResult, unsafeCSS} from "lit";
+import manager, {DefaultColor4, Util} from "@openremote/core";
 import {i18next} from "@openremote/or-translate";
 import {getContentWithMenuTemplate} from "@openremote/or-mwc-components/or-mwc-menu";
 import {InputType, OrInputChangedEvent} from "@openremote/or-mwc-components/or-mwc-input";
@@ -58,7 +58,7 @@ const styling = css`
         align-items: center;
         padding: 0 15px;
         min-height: 48px;
-        background: var(--or-app-color3, #4c4c4c);
+        background: ${unsafeCSS(DefaultColor4)};
         color: var(--or-app-color7, white);
         --or-icon-fill: var(--or-app-color7, white);
     }

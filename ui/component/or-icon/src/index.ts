@@ -49,6 +49,18 @@ export function createSvgIconSet(size: number, icons: {[name: string]: string}):
     }
 }
 
+export function createImageIconSet(baseUrl: string): IconSet {
+    return {
+        getIconTemplate(icon: string) {
+            return html`<img
+                src="${baseUrl}/shared/images/${icon}.png"
+                style="height: var(--or-icon-height, 24px); width: var(--or-icon-width, 24px); pointer-events: var(--or-icon-pointer-events, none);"
+                alt=""
+            />`;
+        }
+    };
+}
+
 export function createMdiIconSet(managerUrl: string): IconSet {
     return {
         getIconTemplate(icon: string) {

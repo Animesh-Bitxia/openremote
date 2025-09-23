@@ -19,7 +19,7 @@ export interface OrMwcTabItem {
 //language=css
 const tabStyling = css`
     .mdc-tab {
-        background: var(--or-app-color4, ${unsafeCSS(DefaultColor4)});
+        background: ${unsafeCSS(DefaultColor4)};
     }
     .mdc-tab .mdc-tab__text-label {
         color: var(--or-app-color8, ${unsafeCSS(DefaultColor8)});

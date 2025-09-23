@@ -88,7 +88,7 @@ export const DefaultHeaderMainMenu: {[name: string]: HeaderItem} = {
     insights: headerItemInsights(orApp),
     gatewayConnection: headerItemGatewayConnection(orApp),
     gatewayTunnel: headerItemGatewayTunnel(orApp),
-    language: headerItemLanguage(orApp),
+    // language: headerItemLanguage(orApp),
     logs: headerItemLogs(orApp),
     account: headerItemAccount(orApp),
     users: headerItemUsers(orApp),
